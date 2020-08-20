@@ -1,109 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
+<meta charset="UTF-8">
+<style>
 
-    <title>Collapsible Tree Example</title>
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 3px;
+}
 
-    <style>
+.node text {
+  font: 12px sans-serif;
+}
 
- .node circle {
-   fill: #fff;
-   stroke: steelblue;
-   stroke-width: 3px;
- }
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
 
- .node text { font: 12px sans-serif; }
+</style>
 
- .link {
-   fill: none;
-   stroke: #ccc;
-   stroke-width: 2px;
- }
- 
-    </style>
-
-  </head>
-
-  <body>
+<body>
 
 <!-- load the d3.js library --> 
-<script src="http://d3js.org/d3.v3.min.js"></script>
- 
+<script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 
-var treeData = [{'name': 'Cat', 'children': [{'name': 'Domestication', 'children': [{'name': 'Charles_Darwin', 'children': []}, {'name': 'Domestication_of_dogs', 'children': []}, {'name': 'Cereal', 'children': []}, {'name': 'Latin_language', 'children': []}, {'name': 'Houseplant', 'children': []}, {'name': 'Mutualism_(biology)', 'children': []}, {'name': 'Domestication_syndrome', 'children': []}, {'name': 'Domestication_of_animals', 'children': []}, {'name': 'Neolithic_transition', 'children': []}, {'name': 'Domestic_dog', 'children': []}, {'name': 'Tame_animal', 'children': []}, {'name': 'Coevolution', 'children': []}, {'name': 'Poultry', 'children': []}, {'name': 'Insect', 'children': []}, {'name': 'Drosophila_melanogaster', 'children': []}, {'name': 'Wheat', 'children': []}, {'name': 'Middle_East', 'children': []}, {'name': 'Bottle_gourd', 'children': []}, {'name': 'Fertile_Crescent', 'children': []}, {'name': 'Americas', 'children': []}, {'name': 'Drought_tolerance', 'children': []}, {'name': 'Crop_wild_relative', 'children': []}, {'name': 'Fungi', 'children': []}, {'name': 'Piebald', 'children': []}, {'name': 'Zoonotic', 'children': []}, {'name': 'Paul_Shepard', 'children': []}, {'name': 'Jared_Diamond', 'children': []}, {'name': 'Anarcho-primitivist', 'children': []}, {'name': 'Genetic_diversity', 'children': []}]}, {'name': 'Cat_anatomy', 'children': [{'name': 'Felis', 'children': []}, {'name': 'Premolar', 'children': []}, {'name': 'Filiform_papilla', 'children': []}, {'name': 'Cat_communication', 'children': []}, {'name': 'Directional_hearing', 'children': []}, {'name': 'Digitigrade', 'children': []}, {'name': 'Gait', 'children': []}, {'name': 'Family_(biology)', 'children': []}, {'name': 'Dewclaw', 'children': []}, {'name': 'Mutation', 'children': []}, {'name': 'Body_temperature', 'children': []}, {'name': 'Veterinary_medicine', 'children': []}, {'name': 'Nape', 'children': []}, {'name': 'Wikipedia:No_original_research', 'children': []}, {'name': 'Cervical_vertebrae', 'children': []}, {'name': 'Forelimbs', 'children': []}, {'name': 'Insertion_(anatomy)', 'children': []}, {'name': 'Ventral', 'children': []}, {'name': 'Trapezius_muscles', 'children': []}, {'name': 'Fascia', 'children': []}, {'name': 'Anatomical_terms_of_location', 'children': []}, {'name': 'Platysma', 'children': []}, {'name': 'Latissimus_dorsi', 'children': []}, {'name': 'Caudofemoralis', 'children': []}, {'name': 'Manubrium', 'children': []}, {'name': 'Sternum', 'children': []}, {'name': 'Clavicle', 'children': []}, {'name': 'Bile', 'children': []}, {'name': 'Hairball', 'children': []}, {'name': 'Vagina', 'children': []}]}, {'name': 'Near_East', 'children': [{'name': 'Region', 'children': []}, {'name': 'National_Geographic_Society', 'children': []}, {'name': 'Ottoman_Empire', 'children': []}, {'name': 'Sick_man_of_Europe', 'children': []}, {'name': 'Far_East', 'children': []}, {'name': 'Barbary_Coast', 'children': []}, {'name': 'British_Empire', 'children': []}, {'name': 'Linear_B', 'children': []}, {'name': 'Ptolemy', 'children': []}, {'name': 'East_Indies', 'children': []}, {'name': 'Elizabeth_I_of_England', 'children': []}, {'name': 'Decline_of_the_Ottoman_Empire', 'children': []}, {'name': 'Lands_of_the_Hungarian_Crown', 'children': []}, {'name': 'Crimean_War', 'children': []}, {'name': 'The_Times', 'children': []}, {'name': 'Duke_of_Wellington', 'children': []}, {'name': 'Biblical_archaeology', 'children': []}, {'name': 'Sir_Henry_Rawlinson,_1st_Baronet', 'children': []}, {'name': 'David_George_Hogarth', 'children': []}, {'name': 'Geopolitics', 'children': []}, {'name': 'Hamidian_Massacres', 'children': []}, {'name': 'Sir_Henry_Norman,_1st_Baronet', 'children': []}, {'name': 'Balkans', 'children': []}, {'name': 'Triple_Entente', 'children': []}, {'name': 'Arnold_J._Toynbee', 'children': []}, {'name': 'Janus', 'children': []}, {'name': 'Mustafa_Kemal_Atat%C3%BCrk', 'children': []}, {'name': 'Thomas_Edward_Gordon', 'children': []}, {'name': 'Alfred_Thayer_Mahan', 'children': []}, {'name': 'Bertram_Lenox_Simpson', 'children': []}, {'name': 'James_Henry_Breasted', 'children': []}, {'name': 'Kenya', 'children': []}, {'name': 'Charles_George_Gordon', 'children': []}, {'name': 'Karachi', 'children': []}, {'name': 'Political_science', 'children': []}, {'name': 'Ancient_Near_East', 'children': []}, {'name': 'Wikipedia:Citation_needed', 'children': []}, {'name': 'Bureau_of_Near_Eastern_Affairs', 'children': []}, {'name': 'Near_East_South_Asia_Center_for_Strategic_Studies', 'children': []}, {'name': 'Washington_Institute_for_Near_East_Policy', 'children': []}, {'name': 'United_Nations', 'children': []}, {'name': 'Central_Intelligence_Agency', 'children': []}, {'name': 'United_States_Agency_for_International_Development', 'children': []}, {'name': 'Foreign_and_Commonwealth_Office', 'children': []}, {'name': 'Greece', 'children': []}, {'name': 'James_B._Pritchard', 'children': []}, {'name': 'Liberal_arts', 'children': []}, {'name': 'Oxford_University', 'children': []}, {'name': 'Middle_East', 'children': []}, {'name': 'Geographic_coordinate_system', 'children': []}]}, {'name': 'Old_English', 'children': [{'name': 'Anglo-Frisian_languages', 'children': []}, {'name': 'West_Germanic_languages', 'children': []}, {'name': 'List_of_English_words_of_Anglo-Saxon_origin', 'children': []}, {'name': 'Angling', 'children': []}, {'name': 'Anglo-Saxon_settlement_of_Britain', 'children': []}, {'name': 'West_Germanic_language', 'children': []}, {'name': 'Christianisation_of_Anglo-Saxon_England', 'children': []}, {'name': 'Danelaw', 'children': []}, {'name': '%C3%86thelwold_of_Winchester', 'children': []}, {'name': 'Middle_English', 'children': []}, {'name': 'Modern_English', 'children': []}, {'name': 'Mercian_(Old_English)', 'children': []}, {'name': 'River_Tyne', 'children': []}, {'name': 'Phonological_history_of_Old_English#Dialects', 'children': []}, {'name': 'British_Celtic_languages', 'children': []}, {'name': 'Latin', 'children': []}, {'name': 'Old_Norse', 'children': []}, {'name': 'Synthetic_language', 'children': []}, {'name': 'Late_West_Saxon', 'children': []}, {'name': 'Phoneme', 'children': []}, {'name': 'English_phonology#Consonants', 'children': []}, {'name': 'Sound_change', 'children': []}, {'name': 'Phonological_history_of_English', 'children': []}, {'name': 'Noun', 'children': []}, {'name': 'Pronoun', 'children': []}, {'name': 'Grammatical_conjugation', 'children': []}, {'name': 'English_personal_pronouns', 'children': []}, {'name': 'Uses_of_English_verb_forms', 'children': []}, {'name': 'Syntax', 'children': []}, {'name': 'Runic_alphabet', 'children': []}, {'name': '%C3%86', 'children': []}, {'name': 'Insular_G', 'children': []}, {'name': 'English_orthography', 'children': []}, {'name': 'Consonant_length', 'children': []}, {'name': 'Beowulf', 'children': []}, {'name': 'Lord%27s_Prayer', 'children': []}, {'name': 'Cnut_the_Great', 'children': []}, {'name': 'Lexicography', 'children': []}, {'name': 'William_Somner', 'children': []}, {'name': 'Oxford_English_Dictionary', 'children': []}, {'name': 'Alistair_Campbell_(academic)', 'children': []}, {'name': 'Modern_Paganism', 'children': []}]}, {'name': 'en.wiktionary.org', 'children': []}, {'name': 'Scientific_name', 'children': [{'name': 'Species', 'children': []}, {'name': 'Generic_name_(biology)', 'children': []}, {'name': 'International_Code_of_Zoological_Nomenclature', 'children': []}, {'name': 'Proper_noun', 'children': []}, {'name': 'Binomial_nomenclature#Authority', 'children': []}, {'name': 'Bauhin', 'children': []}, {'name': 'Tradescantia_virginiana', 'children': []}, {'name': 'Taxonomy_(biology)', 'children': []}, {'name': 'Grammatical_number', 'children': []}, {'name': 'Nomenclature_codes', 'children': []}, {'name': 'Clade', 'children': []}, {'name': 'Homo_sapiens', 'children': []}, {'name': 'Cf.', 'children': []}, {'name': 'Basionym', 'children': []}, {'name': 'Passeridae', 'children': []}, {'name': 'Olive-backed_pipit', 'children': []}]}, {'name': 'International_Commission_on_Zoological_Nomenclature', 'children': [{'name': 'ICZN_Code', 'children': []}, {'name': 'National_University_of_Singapore', 'children': []}, {'name': 'International_Code_of_Zoological_Nomenclature', 'children': []}, {'name': 'Conserved_name', 'children': []}]}, {'name': 'Family_(biology)', 'children': [{'name': 'Latin_language', 'children': []}, {'name': 'Pierre_Magnol', 'children': []}, {'name': 'Carl_Linnaeus', 'children': []}, {'name': 'Michel_Adanson', 'children': []}, {'name': 'Zoology', 'children': []}, {'name': 'De_Candolle_system', 'children': []}]}, {'name': 'Taming', 'children': [{'name': 'Animal', 'children': []}, {'name': 'Behavior_modification', 'children': []}]}, {'name': 'Preadaptation', 'children': [{'name': 'Co-option_(biology)', 'children': []}, {'name': 'Charles_Darwin', 'children': []}, {'name': 'David_Buss', 'children': []}, {'name': 'Wikipedia:Manual_of_Style', 'children': []}, {'name': 'Feathers', 'children': []}, {'name': 'Gray_wolf', 'children': []}, {'name': 'Arthropod', 'children': []}, {'name': 'J%C3%BCrgen_Brosius', 'children': []}, {'name': 'On_the_Origin_of_Species', 'children': []}, {'name': 'Jury-rigged', 'children': []}]}, {'name': 'Cat_breeds', 'children': [{'name': 'The_International_Cat_Association', 'children': []}, {'name': 'World_Cat_Federation', 'children': []}, {'name': 'Domestic_short-haired', 'children': []}]}, {'name': 'European_wildcat', 'children': [{'name': 'Wildcat', 'children': []}, {'name': 'France', 'children': []}, {'name': 'Zoological_specimen', 'children': []}, {'name': 'Phylogenetic', 'children': []}, {'name': 'Evolution', 'children': []}, {'name': 'Fossil', 'children': []}, {'name': 'Domestic_cat', 'children': []}, {'name': 'Chinese_mountain_cat', 'children': []}, {'name': 'Asiatic_wildcat', 'children': []}, {'name': 'Southern_African_wildcat', 'children': []}, {'name': 'European_rabbit', 'children': []}, {'name': 'Broad-leaved_tree', 'children': []}, {'name': 'Nijmegen', 'children': []}, {'name': 'Jura_Mountains', 'children': []}, {'name': 'Carpathian_Mountains', 'children': []}, {'name': 'Hamster', 'children': []}, {'name': 'Feral_cats', 'children': []}, {'name': 'CITES_Appendix_II', 'children': []}, {'name': 'Bund_f%C3%BCr_Umwelt_und_Naturschutz_Deutschland', 'children': []}, {'name': 'Scottish_Natural_Heritage', 'children': []}, {'name': 'Frances_Pitt', 'children': []}]}, {'name': 'Cervical_vertebrae', 'children': [{'name': 'Tetrapod', 'children': []}, {'name': 'Transverse_foramen', 'children': []}, {'name': 'Vertebra', 'children': []}, {'name': '%C3%89douard_Chassaignac', 'children': []}, {'name': 'Atlas_(anatomy)', 'children': []}, {'name': 'Human_skull', 'children': []}, {'name': 'Bone', 'children': []}, {'name': 'Cervical_rib', 'children': []}, {'name': 'Ligamentum_nuchae', 'children': []}, {'name': 'Anatomical_terms_of_motion', 'children': []}, {'name': 'Atlanto-axial_joint', 'children': []}, {'name': 'Spondylosis', 'children': []}, {'name': 'Thoracic_diaphragm', 'children': []}, {'name': 'Hangman%27s_fracture', 'children': []}, {'name': 'Clearing_the_cervical_spine', 'children': []}, {'name': 'Vertebral_column', 'children': []}, {'name': 'commons.wikimedia.org', 'children': []}, {'name': 'sketchfab.com', 'children': []}, {'name': 'Public_domain', 'children': []}]}, {'name': 'Eye_socket', 'children': [{'name': 'Anatomy', 'children': []}, {'name': 'Foramen', 'children': []}, {'name': 'Optic_canal', 'children': []}, {'name': 'Embryology', 'children': []}, {'name': 'Frontal_bone', 'children': []}, {'name': 'Maxilla', 'children': []}, {'name': 'Ethmoid', 'children': []}, {'name': 'Eye', 'children': []}, {'name': 'Superior_rectus', 'children': []}, {'name': 'Exophthalmos', 'children': []}, {'name': 'Lacrimal_gland', 'children': []}, {'name': 'Glioma', 'children': []}, {'name': 'Graves_disease', 'children': []}]}, {'name': 'Digitigrade', 'children': [{'name': 'Limb_(anatomy)', 'children': []}, {'name': 'Sole_(foot)', 'children': []}]}, {'name': 'Dewclaw', 'children': [{'name': 'Digit_(anatomy)', 'children': []}, {'name': 'Dog', 'children': []}, {'name': 'Canid', 'children': []}, {'name': 'Veterinarian', 'children': []}, {'name': 'Felidae', 'children': []}, {'name': 'Hoof', 'children': []}]}, {'name': 'Night_vision', 'children': []}, {'name': 'Olfactory_bulb', 'children': []}, {'name': 'Taste_bud', 'children': []}, {'name': 'Vibrissa', 'children': []}, {'name': 'Rapid_eye_movement_sleep', 'children': []}, {'name': 'Feral_cat_colony', 'children': []}, {'name': 'Ethology', 'children': []}, {'name': 'Scent_rubbing', 'children': []}, {'name': 'Animal_communication', 'children': []}, {'name': 'Breastfeeding', 'children': []}, {'name': 'Feline_immunodeficiency_virus', 'children': []}, {'name': 'Neophobia', 'children': []}, {'name': 'Cat_and_mouse', 'children': []}, {'name': 'Polyestrous', 'children': []}, {'name': 'Penis', 'children': []}, {'name': 'Vulva', 'children': []}, {'name': 'Morula', 'children': []}, {'name': 'Genetic_disorder', 'children': []}, {'name': 'Cosmopolitan_species', 'children': []}, {'name': 'Pet', 'children': []}, {'name': 'Fur_trade', 'children': []}, {'name': 'Canadian_Federation_of_Humane_Societies', 'children': []}, {'name': 'Cat_show', 'children': []}, {'name': 'Virus', 'children': []}, {'name': 'Ancient_Egypt', 'children': []}, {'name': 'Maneki_neko', 'children': []}, {'name': 'Superstition', 'children': []}, {'name': 'Fox', 'children': []}]}];
+// Set the dimensions and margins of the diagram
+var margin = {top: 20, right: 90, bottom: 30, left: 90},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
 
-
-
-
-// ************** Generate the tree diagram  *****************
-var margin = {top: 20, right: 120, bottom: 20, left: 120},
- width = 1500 - margin.right - margin.left,
- height = 5000 - margin.top - margin.bottom;
- 
-var i = 0;
-
-var tree = d3.layout.tree()
- .size([height, width]);
-
-var diagonal = d3.svg.diagonal()
- .projection(function(d) { return [d.y, d.x]; });
-
+// append the svg object to the body of the page
+// appends a 'group' element to 'svg'
+// moves the 'group' element to the top left margin
 var svg = d3.select("body").append("svg")
- .attr("width", width + margin.right + margin.left)
- .attr("height", height + margin.top + margin.bottom)
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
   .append("g")
- .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate("
+          + margin.left + "," + margin.top + ")");
 
-root = treeData[0];
-  
+var i = 0,
+    duration = 750,
+    root;
+
+// declares a tree layout and assigns the size
+var treemap = d3.tree().size([height, width]);
+
+// load the external data
+d3.json("treeData.json", function(error, treeData) {
+  if (error) throw error;
+
+// Assigns parent, children, height, depth
+root = d3.hierarchy(treeData, function(d) { return d.children; });
+root.x0 = height / 2;
+root.y0 = 0;
+
+// Collapse after the second level
+root.children.forEach(collapse);
+
 update(root);
+
+});
+
+// Collapse the node and all it's children
+function collapse(d) {
+  if(d.children) {
+    d._children = d.children
+    d._children.forEach(collapse)
+    d.children = null
+  }
+}
 
 function update(source) {
 
+  // Assigns the x and y position for the nodes
+  var treeData = treemap(root);
+
   // Compute the new tree layout.
-  var nodes = tree.nodes(root).reverse(),
-   links = tree.links(nodes);
+  var nodes = treeData.descendants(),
+      links = treeData.descendants().slice(1);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 180; });
+  nodes.forEach(function(d){ d.y = d.depth * 180});
 
-  // Declare the nodesâ€¦
-  var node = svg.selectAll("g.node")
-   .data(nodes, function(d) { return d.id || (d.id = ++i); });
+  // ****************** Nodes section ***************************
 
-  // Enter the nodes.
-  var nodeEnter = node.enter().append("g")
-   .attr("class", "node")
-   .attr("transform", function(d) { 
-    return "translate(" + d.y + "," + d.x + ")"; });
+  // Update the nodes...
+  var node = svg.selectAll('g.node')
+      .data(nodes, function(d) {return d.id || (d.id = ++i); });
 
-  nodeEnter.append("circle")
-   .attr("r", 10)
-   .style("fill", "#fff");
+  // Enter any new modes at the parent's previous position.
+  var nodeEnter = node.enter().append('g')
+      .attr('class', 'node')
+      .attr("transform", function(d) {
+        return "translate(" + source.y0 + "," + source.x0 + ")";
+    })
+    .on('click', click);
 
-  nodeEnter.append("text")
-   .attr("x", function(d) { 
-    return d.children || d._children ? -13 : 13; })
-   .attr("dy", ".35em")
-   .attr("text-anchor", function(d) { 
-    return d.children || d._children ? "end" : "start"; })
-   .text(function(d) { return d.name; })
-   .style("fill-opacity", 1);
+  // Add Circle for the nodes
+  nodeEnter.append('circle')
+      .attr('class', 'node')
+      .attr('r', 1e-6)
+      .style("fill", function(d) {
+          return d._children ? "lightsteelblue" : "#fff";
+      });
 
-  // Declare the linksâ€¦
-  var link = svg.selectAll("path.link")
-   .data(links, function(d) { return d.target.id; });
+  // Add labels for the nodes
+  nodeEnter.append('text')
+      .attr("dy", ".35em")
+      .attr("x", function(d) {
+          return d.children || d._children ? -13 : 13;
+      })
+      .attr("text-anchor", function(d) {
+          return d.children || d._children ? "end" : "start";
+      })
+      .text(function(d) { return d.data.name; });
 
-  // Enter the links.
-  link.enter().insert("path", "g")
-   .attr("class", "link")
-   .attr("d", diagonal);
+  // UPDATE
+  var nodeUpdate = nodeEnter.merge(node);
 
+  // Transition to the proper position for the node
+  nodeUpdate.transition()
+    .duration(duration)
+    .attr("transform", function(d) { 
+        return "translate(" + d.y + "," + d.x + ")";
+     });
+
+  // Update the node attributes and style
+  nodeUpdate.select('circle.node')
+    .attr('r', 10)
+    .style("fill", function(d) {
+        return d._children ? "lightsteelblue" : "#fff";
+    })
+    .attr('cursor', 'pointer');
+
+
+  // Remove any exiting nodes
+  var nodeExit = node.exit().transition()
+      .duration(duration)
+      .attr("transform", function(d) {
+          return "translate(" + source.y + "," + source.x + ")";
+      })
+      .remove();
+
+  // On exit reduce the node circles size to 0
+  nodeExit.select('circle')
+    .attr('r', 1e-6);
+
+  // On exit reduce the opacity of text labels
+  nodeExit.select('text')
+    .style('fill-opacity', 1e-6);
+
+  // ****************** links section ***************************
+
+  // Update the links...
+  var link = svg.selectAll('path.link')
+      .data(links, function(d) { return d.id; });
+
+  // Enter any new links at the parent's previous position.
+  var linkEnter = link.enter().insert('path', "g")
+      .attr("class", "link")
+      .attr('d', function(d){
+        var o = {x: source.x0, y: source.y0}
+        return diagonal(o, o)
+      });
+
+  // UPDATE
+  var linkUpdate = linkEnter.merge(link);
+
+  // Transition back to the parent element position
+  linkUpdate.transition()
+      .duration(duration)
+      .attr('d', function(d){ return diagonal(d, d.parent) });
+
+  // Remove any exiting links
+  var linkExit = link.exit().transition()
+      .duration(duration)
+      .attr('d', function(d) {
+        var o = {x: source.x, y: source.y}
+        return diagonal(o, o)
+      })
+      .remove();
+
+  // Store the old positions for transition.
+  nodes.forEach(function(d){
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
+
+  // Creates a curved (diagonal) path from parent to the child nodes
+  function diagonal(s, d) {
+
+    path = `M ${s.y} ${s.x}
+            C ${(s.y + d.y) / 2} ${s.x},
+              ${(s.y + d.y) / 2} ${d.x},
+              ${d.y} ${d.x}`
+
+    return path
+  }
+
+  // Toggle children on click.
+  function click(d) {
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
+      } else {
+        d.children = d._children;
+        d._children = null;
+      }
+    update(d);
+  }
 }
 
 </script>
- 
-  </body>
-</html>
+</body>
