@@ -16,7 +16,9 @@ Created on Tue Jun 23 14:58:48 2020
 
          Enter goal article: Dog
          Begining search
+         
          Goal article found!
+         
          ['Cat', 'Domestication', 'Cat_anatomy', 'Near_East', 'en.wikipedia.org', 
          'Old_English', 'en.wiktionary.org', 'Scientific_name', 
          'International_Commission_on_Zoological_Nomenclature', 'Family_(biology)', 
@@ -24,7 +26,11 @@ Created on Tue Jun 23 14:58:48 2020
          'Eye_socket', 'Digitigrade', 'Dewclaw']
          
          Diameter of graph is 2
-         Eccentricity of graph is {'Dog': 
+         
+         Eccentricity of graph is {'Cat': 1, 'Domestication': 2, 'Cat_anatomy': 2, 'Near_East': 2,
+         'Old_English': 2, 'Scientific_name': 2, 'International_Commission_on_Zoological_Nomenclature': 2, 
+         'Family_(biology)': 2, 'Taming': 2, 'Preadaptation': 2, 'Cat_breeds': 2, 'European_wildcat': 2, 
+         'Cervical_vertebrae': 2, 'Eye_socket': 2, 'Digitigrade': 2, 'Dewclaw': 2}
          
          
     Note: This algorithm does not provide the shortest path, it is based on uninformed search
@@ -91,7 +97,7 @@ def convert_helper(d):
         return [{"name": d}]
 
 
-# Adding nesting levels
+# Adding nesting levels 3 levels
         
 def secondLevel(dictionary):
     for new_tree in dictionary.values():
@@ -116,16 +122,16 @@ def wikiSearchBfs(tree_dict1, parent, recursion=0):
                 if goalArticle in children: # if goal node found -> end program and print parents
                     print('Goal article found!\n')
                     print(visited) # Print visited nodes
+                    print('/n')
                     tree_dict1[parent][i] = children # Append last article into visited nodes
                     G = toGraph(tree_dict)
                     print("Diameter of graph is {}".format(nx.diameter(G)))
                     print("\nEccentricity of graph is {}".format(nx.eccentricity(G)))
                     
-                    
+                    # load nested ditionaty into json file 
                     with open('treeData.json', 'w') as outfile:
                         json.dump(convert(tree_dict), outfile)
-                    #open('index.html')
-                        
+
                     sys.exit(0)
                 
                 for k in list(children): # check if node has already been visited
@@ -174,6 +180,7 @@ def checkArticles(start, goal):
     soupS = BeautifulSoup(dataS, "html.parser")
     soupG = BeautifulSoup(dataG, "html.parser")
 
+    # check each article if it exists on Wikipedia
     def checkEach(soups, title=''):
         for i in soupS.find_all('b')[0]:
             try:
