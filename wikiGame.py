@@ -75,7 +75,7 @@ def getLinksFrom(article):
 
 # Converting nested ditionary to networkx graph
 def toGraph(dictionary):
-    graph = nx.from_dict_of_dicts(dictionary)
+    graph = nx.from_dict_of_dicts(dictionary,multigraph_input=True)
     return graph
 
 # Convert to graphable format for JSON dumps
@@ -125,6 +125,7 @@ def wikiSearchBfs(tree_dict1, parent, recursion=0):
                     with open('treeData.json', 'w') as outfile:
                         json.dump(convert(tree_dict), outfile)
                     #open('index.html')
+                        
                     sys.exit(0)
                 
                 for k in list(children): # check if node has already been visited
