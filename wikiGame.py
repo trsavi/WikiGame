@@ -40,52 +40,61 @@ Created on Tue Jun 23 14:58:48 2020
 
 """
 
-import re
 import requests
 from bs4 import BeautifulSoup
 import sys
 import networkx as nx
 import json
+import wikipedia
+import random
 
 
-
+# Entering start and goal article 
 startArticle = str(input('Enter start article: '))
 goalArticle = str(input('Enter goal article: '))
 startArticle = startArticle.replace(" ", "_")
 goalArticle = goalArticle.replace(" ", "_")
 visited = [startArticle]
+hyperlinks={}
 
 
-
-# Function that gets all hyperlinks from /wiki/article page
+# Function that gets all hyperlinks from article page
 def getLinksFrom(article):
-    page = "https://en.wikipedia.org/wiki/" + article # string concatenation for url
-    r = requests.get(page)
-    data = r.content  # Content of response
-    soup = BeautifulSoup(data, "html.parser")
-    
-    hyperlinks = {}
-    for i in soup.find_all('p'):
-       try:
-           link = i.find('a',href=True)['href']
-           if re.search('^#',link) or re.search('/wiki/Help:IPA', link) or re.search('/wiki/en.wiktionary.org', link) or re.search('/wiki/index.php', link):
-               pass
-           else:
-               
-               hyperlinks[link.split('/')[2]] = {} # set al linkks to be dictionaries by default
-       except:
-          continue
+
+    try:
+        page = wikipedia.page(article)
+        links = page.links
+        hyperlinks = {}
+        
+        for link in links:
+            
+            hyperlinks[link] = {}
+        
+            
+    except wikipedia.exceptions.PageError:
+        hyperlinks=None
+    except wikipedia.exceptions.DisambiguationError as e:
+        for name in e.options:
+            try:
+                page = wikipedia.page(name)
+                links = page.links
+                hyperlinks = {}
+                for link in links:
+                    hyperlinks[link] = {}
+                return hyperlinks
+            except wikipedia.exceptions.DisambiguationError:
+                pass
+    except KeyError:
+        hyperlinks=None
+            
     return hyperlinks
-
-
 
 # Converting nested ditionary to networkx graph
 def toGraph(dictionary):
     graph = nx.from_dict_of_dicts(dictionary,multigraph_input=True)
     return graph
 
-# Convert to graphable format for JSON dumps
-    
+# Convert nested dictionary to graphable format for JSON dumps   
 def convert(d):
     for k, v in d.items():
         return {"name": k, "children": convert_helper(v)}
@@ -97,7 +106,7 @@ def convert_helper(d):
         return [{"name": d}]
 
 
-# Adding nesting levels 3 levels
+# Adding more nesting levels using recursion
         
 def secondLevel(dictionary):
     for new_tree in dictionary.values():
@@ -119,39 +128,58 @@ def wikiSearchBfs(tree_dict1, parent, recursion=0):
             if i not in visited: # if node already exists, don't iterate again
                 visited.append(i)
                 children = getLinksFrom(i)
-                if goalArticle in children: # if goal node found -> end program and print parents
-                    print('Goal article found!\n')
-                    print(visited) # Print visited nodes
-                    print('/n')
-                    tree_dict1[parent][i] = children # Append last article into visited nodes
-                    G = toGraph(tree_dict)
-                    print("Diameter of graph is {}".format(nx.diameter(G)))
-                    print("\nEccentricity of graph is {}".format(nx.eccentricity(G)))
+                if children!=None:
+                    if goalArticle in children: # if goal node found -> end program and print parents
+                        print('Goal article found!\n')
+                        print(visited) # Print visited nodes
+                        print('/n')
+                        
+                        tree_dict1[parent][i] = children # Append last article into visited nodes
+                        
+                        G = toGraph(tree_dict) # Convert nested dictionary to graph
+                        print("Diameter of graph is {}".format(nx.diameter(G)))
+                        print("\nEccentricity of graph is {}".format(nx.eccentricity(G)))
+                        
+                        # load nested ditionaty into json file 
+                        with open('treeData.json', 'w') as outfile:
+                            json.dump(convert(tree_dict), outfile)
+    
+                        sys.exit(0)
                     
-                    # load nested ditionaty into json file 
-                    with open('treeData.json', 'w') as outfile:
-                        json.dump(convert(tree_dict), outfile)
-
-                    sys.exit(0)
-                
-                for k in list(children): # check if node has already been visited
-                    if k in visited:
-                        del children[k]  # if so, delete that node from children list
-                tree_dict1[parent][i] = children
+                    for k in list(children): # check if node has already been visited
+                        if k in visited:
+                            del children[k]  # if so, delete that node from children list
+                    tree_dict1[parent][i] = children
                 
               
         if recursion==0:
-            for new_tree in tree_dict1.values():
-                for parent_tree in tree_dict[parent]:
-                    wikiSearchBfs(new_tree, parent_tree, recursion=1)
-                    
-            secondLevel(tree_dict)
-            thirdLevel(tree_dict)
+            try:
+                
+                # Second degree
+                print("Second Degree")
+                for new_tree in tree_dict1.values():
+                    for parent_tree in tree_dict[parent]:
+                        wikiSearchBfs(new_tree, parent_tree, recursion=1)
+                # Third degree
+                print("Third Degree")
+                secondLevel(tree_dict)
+                # fourth degree
+                print("Fourth Degree")
+                thirdLevel(tree_dict)
+            except:
+                print("Unexpected error in nesting:", sys.exc_info()[0])
+                pass
              
                     
-    except:
-        sys.exit(0)
+    except UnboundLocalError:
+        print("Unexpected error:", sys.exc_info()[0])
         pass
+    except KeyError:
+        pass
+        #print("Unexpected error in wikiS:", sys.exc_info()[0])
+        #pass
+        
+       
 
 # Function that checks if the goal hyperlink (article) is already in the start article hyperlinks
 # If not then calls wikiSearchBfs function
@@ -159,18 +187,27 @@ def checkDict(tree_dict, start=startArticle):
     for items in tree_dict.values():
         if goalArticle in items:
                 print('The goal topic is in the first article!!')
-                break
+                sys.exit()
         else:
             print('Begining search')
-            wikiSearchBfs(tree_dict, start)
-            
+            wikiSearchBfs(tree_dict, start, recursion=0)
+# Function that checks if the start and goal article is valid
+def checkPage(start, goal):
+    if start=="" or goal=="":
+        return False
+    try:
+         wikipedia.page(start)
+         wikipedia.page(goal)
+         return True
+    except wikipedia.exceptions.PageError:
+        print("Invalid page name!")
+        return False
+# function that uses directlyy beautifoul soup and requests to check goal and start article               
 def checkArticles(start, goal):
     
     if start=="" or goal=="":
         return False   
-    
-    
-    
+
     startPage = "https://en.wikipedia.org/wiki/" + start
     goalPage = "https://en.wikipedia.org/wiki/" + goal
     rS = requests.get(startPage)
@@ -203,12 +240,14 @@ def checkArticles(start, goal):
         
 
 if __name__=="__main__":
-    # set initial dictionary to be from start article
-    tree_dict = {startArticle: getLinksFrom(startArticle)}
-    if checkArticles(startArticle, goalArticle):
-        checkDict(tree_dict, startArticle)
-     
-    print("Couldn't find connection with goal article, sorry...")
+    
+    if checkPage(startArticle, goalArticle):
+        # set initial dictionary to be from start article
+        tree_dict = {startArticle: getLinksFrom(startArticle)}
+        try:
+            checkDict(tree_dict, startArticle)
+        except:
+            pass
     
 
             
