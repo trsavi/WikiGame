@@ -46,8 +46,6 @@ import sys
 import networkx as nx
 import json
 import wikipedia
-import random
-
 
 # Entering start and goal article 
 startArticle = str(input('Enter start article: '))
@@ -56,6 +54,7 @@ startArticle = startArticle.replace(" ", "_")
 goalArticle = goalArticle.replace(" ", "_")
 visited = [startArticle]
 hyperlinks={}
+path=[startArticle]
 
 
 # Function that gets all hyperlinks from article page
@@ -83,6 +82,7 @@ def getLinksFrom(article):
                     hyperlinks[link] = {}
                 return hyperlinks
             except wikipedia.exceptions.DisambiguationError:
+                hyperlinks=None
                 pass
     except KeyError:
         hyperlinks=None
@@ -125,32 +125,32 @@ def thirdLevel(dictionary):
 def wikiSearchBfs(tree_dict1, parent, recursion=0):
     try:
         for i in tree_dict1[parent]: # iterating through children from parent node            
-            if i not in visited: # if node already exists, don't iterate again
+            if i not in visited:# if node already exists, don't iterate again
                 visited.append(i)
+                path.append(i)
                 children = getLinksFrom(i)
                 if children!=None:
                     if goalArticle in children: # if goal node found -> end program and print parents
                         print('Goal article found!\n')
-                        print(visited) # Print visited nodes
+                        print(path) # Print path to goal article
                         print('/n')
-                        
+            
                         tree_dict1[parent][i] = children # Append last article into visited nodes
                         
                         G = toGraph(tree_dict) # Convert nested dictionary to graph
                         print("Diameter of graph is {}".format(nx.diameter(G)))
-                        print("\nEccentricity of graph is {}".format(nx.eccentricity(G)))
-                        
+                        print("\nEccentricity of graph is {}".format(nx.eccentricity(G)))                  
                         # load nested ditionaty into json file 
                         with open('treeData.json', 'w') as outfile:
                             json.dump(convert(tree_dict), outfile)
     
                         sys.exit(0)
-                    
+                    path.pop()
                     for k in list(children): # check if node has already been visited
                         if k in visited:
                             del children[k]  # if so, delete that node from children list
                     tree_dict1[parent][i] = children
-                
+                    
               
         if recursion==0:
             try:
@@ -159,7 +159,9 @@ def wikiSearchBfs(tree_dict1, parent, recursion=0):
                 print("Second Degree")
                 for new_tree in tree_dict1.values():
                     for parent_tree in tree_dict[parent]:
+                        path.append(parent_tree)
                         wikiSearchBfs(new_tree, parent_tree, recursion=1)
+                        path.pop()
                 # Third degree
                 print("Third Degree")
                 secondLevel(tree_dict)
@@ -202,6 +204,10 @@ def checkPage(start, goal):
     except wikipedia.exceptions.PageError:
         print("Invalid page name!")
         return False
+    except wikipedia.exceptions.DisambiguationError as e:
+        print("Choose specific article from this list and try again.")
+        print(e.options)
+        
 # function that uses directlyy beautifoul soup and requests to check goal and start article               
 def checkArticles(start, goal):
     
