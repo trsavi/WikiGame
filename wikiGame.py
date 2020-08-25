@@ -46,7 +46,13 @@ import sys
 import networkx as nx
 import json
 import wikipedia
+from time import sleep
+from urllib3.exceptions import InsecureRequestWarning
 
+# Suppress only the single warning from urllib3 needed.
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+# set language on wikipedia
+wikipedia.set_lang('sr')
 # Entering start and goal article 
 startArticle = str(input('Enter start article: '))
 goalArticle = str(input('Enter goal article: '))
@@ -55,6 +61,7 @@ goalArticle = goalArticle.replace(" ", "_")
 visited = [startArticle]
 hyperlinks={}
 path=[startArticle]
+level=0
 
 
 # Function that gets all hyperlinks from article page
@@ -108,11 +115,22 @@ def convert_helper(d):
 
 # Adding more nesting levels using recursion
         
-def secondLevel(dictionary):
+def deeperLevel(dictionary, level=0):
     for new_tree in dictionary.values():
-        for parent_tree in new_tree.values():
-            for parent in parent_tree:
-                wikiSearchBfs(parent_tree, parent, recursion=1)
+        if level==0:
+            for parent_tree in new_tree:
+                path.append(parent_tree)
+                wikiSearchBfs(new_tree, parent_tree, recursion=1)
+                path.pop()
+        elif level==1:
+            for parent_tree in new_tree.values():
+                for parent in parent_tree:
+                    #wikiSearchBfs(parent_tree, parent, recursion=1)
+                    print(parent)
+                    print(parent_tree)
+                    break
+                break
+            
 def thirdLevel(dictionary):
     for new_tree in dictionary.values():
         for parent_tree in new_tree.values():
@@ -122,64 +140,61 @@ def thirdLevel(dictionary):
     
 
 # wikiSearchBfs function is based on Breacth first Search algorithm 
-def wikiSearchBfs(tree_dict1, parent, recursion=0):
+def wikiSearchBfs(tree_dict1, parent, recursion=0, level=0):
     try:
         for i in tree_dict1[parent]: # iterating through children from parent node            
             if i not in visited:# if node already exists, don't iterate again
                 visited.append(i)
                 path.append(i)
                 children = getLinksFrom(i)
+                sleep(1)
                 if children!=None:
                     if goalArticle in children: # if goal node found -> end program and print parents
                         print('Goal article found!\n')
-                        print(path) # Print path to goal article
-                        print('/n')
+                        print("Full path from start article to goal article is {}".format(path)) # Print path to goal article
+                        print('\n')
             
                         tree_dict1[parent][i] = children # Append last article into visited nodes
                         
                         G = toGraph(tree_dict) # Convert nested dictionary to graph
-                        print("Diameter of graph is {}".format(nx.diameter(G)))
-                        print("\nEccentricity of graph is {}".format(nx.eccentricity(G)))                  
+                        print("Diameter of a graph is {}".format(nx.diameter(G)))
+                        #print("\nEccentricity of graph is {}".format(nx.eccentricity(G)))                  
                         # load nested ditionaty into json file 
                         with open('treeData.json', 'w') as outfile:
                             json.dump(convert(tree_dict), outfile)
     
                         sys.exit(0)
                     path.pop()
+                
                     for k in list(children): # check if node has already been visited
                         if k in visited:
                             del children[k]  # if so, delete that node from children list
                     tree_dict1[parent][i] = children
+                
                     
               
         if recursion==0:
+            
             try:
-                
                 # Second degree
-                print("Second Degree")
-                for new_tree in tree_dict1.values():
-                    for parent_tree in tree_dict[parent]:
-                        path.append(parent_tree)
-                        wikiSearchBfs(new_tree, parent_tree, recursion=1)
-                        path.pop()
-                # Third degree
-                print("Third Degree")
-                secondLevel(tree_dict)
-                # fourth degree
-                print("Fourth Degree")
-                thirdLevel(tree_dict)
+                print("Second Degree!")
+                deeperLevel(tree_dict1)
+                print("Third Degree!")
+                deeperLevel(tree_dict1,level=1)
+                
+
             except:
-                print("Unexpected error in nesting:", sys.exc_info()[0])
+                print("Unexpected error in recursion:", sys.exc_info()[0])
                 pass
-             
                     
-    except UnboundLocalError:
-        print("Unexpected error:", sys.exc_info()[0])
-        pass
     except KeyError:
         pass
-        #print("Unexpected error in wikiS:", sys.exc_info()[0])
-        #pass
+    except KeyboardInterrupt:
+        sys.exit()
+    except:
+        print("Unexpected error in wikiS:", sys.exc_info()[0])
+        sys.exit()
+        pass   
         
        
 
