@@ -3,7 +3,7 @@ The Wiki Game is a hypertextual game designed to work specifically with Wikipedi
 
 The game is based of uninformed search algorithm *Breadth First Search*.
 
-*Note: This script **does not** provide optimal or complete solution due to uninformed search and it can be stuck in loop for a long time without finding path from start to goal node*
+
 
 After goal article is found, there is possibility to visualize graph diagram using d3.js functionallity. 
 It is required to add content of treeData.json (which is essentially nested dictionary turned into json dump file) to variable treeData in index.html file. There are two examples of json dictionaries, one is Cat to Dog connection and the other is failed attempt to connect Archerfish to Santa Maria Rupes, which has 4 degrees of connection based on [Six Degrees of Wikipedia](https://en.wikipedia.org/wiki/Wikipedia:Six_degrees_of_Wikipedia)
